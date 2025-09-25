@@ -3,8 +3,10 @@ package net.orcinus.galosphere.events;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment; // Used for client/server check
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
@@ -28,7 +30,8 @@ import net.orcinus.galosphere.network.SendPerspectivePacket;
 import net.orcinus.galosphere.network.handler.ClientEventsHandler;
 import net.orcinus.galosphere.network.handler.ServerEventsHandler;
 
-@EventBusSubscriber(modid = Galosphere.MODID, bus = EventBusSubscriber.Bus.MOD)
+// FIX: Removed ", bus = EventBusSubscriber.Bus.MOD" to resolve deprecation warnings
+@EventBusSubscriber(modid = Galosphere.MODID)
 public class RegisterEvents {
 
     @SubscribeEvent
@@ -50,26 +53,29 @@ public class RegisterEvents {
     @SubscribeEvent
     public static void registerPayloadHandler(RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
-        registrar.playToClient(
-                BarometerPacket.TYPE,
-                BarometerPacket.CODEC,
-                ClientEventsHandler::sendBarometerInfo
-        );
-        registrar.playToClient(
-                PlayCooldownSoundPacket.TYPE,
-                PlayCooldownSoundPacket.CODEC,
-                ClientEventsHandler::playCooldownSound
-        );
-        registrar.playToClient(
-                SendParticlesPacket.TYPE,
-                SendParticlesPacket.CODEC,
-                ClientEventsHandler::handleSendParticles
-        );
-        registrar.playToClient(
-                SendPerspectivePacket.TYPE,
-                SendPerspectivePacket.CODEC,
-                ClientEventsHandler::sendPerspective
-        );
-    }
 
+        // FIX: Check the environment's distribution directly to prevent loading client-only classes on the server
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            registrar.playToClient(
+                    BarometerPacket.TYPE,
+                    BarometerPacket.CODEC,
+                    ClientEventsHandler::sendBarometerInfo
+            );
+            registrar.playToClient(
+                    PlayCooldownSoundPacket.TYPE,
+                    PlayCooldownSoundPacket.CODEC,
+                    ClientEventsHandler::playCooldownSound
+            );
+            registrar.playToClient(
+                    SendParticlesPacket.TYPE,
+                    SendParticlesPacket.CODEC,
+                    ClientEventsHandler::handleSendParticles
+            );
+            registrar.playToClient(
+                    SendPerspectivePacket.TYPE,
+                    SendPerspectivePacket.CODEC,
+                    ClientEventsHandler::sendPerspective
+            );
+        }
+    }
 }
