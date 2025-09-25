@@ -9,6 +9,8 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.orcinus.galosphere.Galosphere;
 import net.orcinus.galosphere.crafting.LumiereReformingManager;
@@ -24,9 +26,9 @@ import net.orcinus.galosphere.network.PlayCooldownSoundPacket;
 import net.orcinus.galosphere.network.SendParticlesPacket;
 import net.orcinus.galosphere.network.SendPerspectivePacket;
 import net.orcinus.galosphere.network.handler.ClientEventsHandler;
-// Removed unnecessary imports (DirectionalPayloadHandler, HandlerThread, ServerEventsHandler)
+import net.orcinus.galosphere.network.handler.ServerEventsHandler;
 
-// FIX: Removed ", bus = EventBusSubscriber.Bus.MOD" to resolve deprecation warnings
+
 @EventBusSubscriber(modid = Galosphere.MODID)
 public class RegisterEvents {
 
@@ -50,26 +52,26 @@ public class RegisterEvents {
     public static void registerPayloadHandler(RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
         
-        // FIX: No if-check here. The channel registration must run on both sides for handshake.
         registrar.playToClient(
                 BarometerPacket.TYPE,
                 BarometerPacket.CODEC,
-                ClientEventsHandler::sendBarometerInfo
+                ServerEventsHandler::sendBarometerInfo
         );
         registrar.playToClient(
                 PlayCooldownSoundPacket.TYPE,
                 PlayCooldownSoundPacket.CODEC,
-                ClientEventsHandler::playCooldownSound
+                ServerEventsHandler::playCooldownSound
         );
         registrar.playToClient(
                 SendParticlesPacket.TYPE,
                 SendParticlesPacket.CODEC,
-                ClientEventsHandler::handleSendParticles
+                ServerEventsHandler::handleSendParticles
         );
         registrar.playToClient(
                 SendPerspectivePacket.TYPE,
                 SendPerspectivePacket.CODEC,
-                ClientEventsHandler::sendPerspective
+                ServerEventsHandler::sendPerspective
         );
     }
+
 }
