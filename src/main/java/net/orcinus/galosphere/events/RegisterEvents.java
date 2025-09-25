@@ -3,16 +3,12 @@ package net.orcinus.galosphere.events;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment; // Used for client/server check
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
-import net.neoforged.neoforge.network.registration.HandlerThread;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.orcinus.galosphere.Galosphere;
 import net.orcinus.galosphere.crafting.LumiereReformingManager;
@@ -28,7 +24,7 @@ import net.orcinus.galosphere.network.PlayCooldownSoundPacket;
 import net.orcinus.galosphere.network.SendParticlesPacket;
 import net.orcinus.galosphere.network.SendPerspectivePacket;
 import net.orcinus.galosphere.network.handler.ClientEventsHandler;
-import net.orcinus.galosphere.network.handler.ServerEventsHandler;
+// Removed unnecessary imports (DirectionalPayloadHandler, HandlerThread, ServerEventsHandler)
 
 // FIX: Removed ", bus = EventBusSubscriber.Bus.MOD" to resolve deprecation warnings
 @EventBusSubscriber(modid = Galosphere.MODID)
@@ -53,29 +49,27 @@ public class RegisterEvents {
     @SubscribeEvent
     public static void registerPayloadHandler(RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
-
-        // FIX: Check the environment's distribution directly to prevent loading client-only classes on the server
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            registrar.playToClient(
-                    BarometerPacket.TYPE,
-                    BarometerPacket.CODEC,
-                    ClientEventsHandler::sendBarometerInfo
-            );
-            registrar.playToClient(
-                    PlayCooldownSoundPacket.TYPE,
-                    PlayCooldownSoundPacket.CODEC,
-                    ClientEventsHandler::playCooldownSound
-            );
-            registrar.playToClient(
-                    SendParticlesPacket.TYPE,
-                    SendParticlesPacket.CODEC,
-                    ClientEventsHandler::handleSendParticles
-            );
-            registrar.playToClient(
-                    SendPerspectivePacket.TYPE,
-                    SendPerspectivePacket.CODEC,
-                    ClientEventsHandler::sendPerspective
-            );
-        }
+        
+        // FIX: No if-check here. The channel registration must run on both sides for handshake.
+        registrar.playToClient(
+                BarometerPacket.TYPE,
+                BarometerPacket.CODEC,
+                ClientEventsHandler::sendBarometerInfo
+        );
+        registrar.playToClient(
+                PlayCooldownSoundPacket.TYPE,
+                PlayCooldownSoundPacket.CODEC,
+                ClientEventsHandler::playCooldownSound
+        );
+        registrar.playToClient(
+                SendParticlesPacket.TYPE,
+                SendParticlesPacket.CODEC,
+                ClientEventsHandler::handleSendParticles
+        );
+        registrar.playToClient(
+                SendPerspectivePacket.TYPE,
+                SendPerspectivePacket.CODEC,
+                ClientEventsHandler::sendPerspective
+        );
     }
 }

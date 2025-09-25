@@ -14,9 +14,13 @@ import net.orcinus.galosphere.network.BarometerPacket;
 import net.orcinus.galosphere.network.PlayCooldownSoundPacket;
 import net.orcinus.galosphere.network.SendParticlesPacket;
 import net.orcinus.galosphere.network.SendPerspectivePacket;
+import net.neoforged.api.distmarker.Dist;    // <-- NEW IMPORT
+import net.neoforged.api.distmarker.OnlyIn;  // <-- NEW IMPORT
 
 import java.util.Optional;
 
+// FIX: This annotation ensures the class is excluded from the server JAR, preventing the original crash.
+@OnlyIn(Dist.CLIENT)
 public class ClientEventsHandler {
 
     public static void handleSendParticles(SendParticlesPacket packet, IPayloadContext ctx) {
